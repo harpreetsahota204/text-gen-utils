@@ -5,7 +5,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndB
 import wandb
 import torch
 
-def gen_pipeline(model_name: str, text: str, generation_pipeline: Pipeline, **kwargs) -> Dict:
+def gen_pipeline(model_name: str, text: str, generation_pipeline: pipeline, **kwargs) -> Dict:
     """
     Generate text using a specific model pipeline and generation parameters.
 
@@ -26,7 +26,7 @@ def gen_pipeline(model_name: str, text: str, generation_pipeline: Pipeline, **kw
         "gen_config": kwargs
     }
 
-def run_single_param_experiment(model_name: str, pipeline: Pipeline, prompt: str, param_name: str, values: List, gen_function: Callable, results_dict: Dict, wandb_project: str, wandb_entity: str):
+def run_single_param_experiment(model_name: str, pipeline: pipeline, prompt: str, param_name: str, values: List, gen_function: Callable, results_dict: Dict, wandb_project: str, wandb_entity: str):
     """
     Run experiments for a single parameter across its range of values for a given prompt and model.
     Logs results to wandb, saves them in a provided dictionary, and prints the generated text.
@@ -62,7 +62,7 @@ def run_single_param_experiment(model_name: str, pipeline: Pipeline, prompt: str
         print(f"Prompt: {prompt}")
         print(f"Generated: {log_entry['generated_text']}\n")
 
-def run_experiments(models: Dict[str, Pipeline], dataset: List[Dict], gen_params: Dict[str, List], gen_function: Callable, prompt_field: str) -> Dict:
+def run_experiments(models: Dict[str, pipeline], dataset: List[Dict], gen_params: Dict[str, List], gen_function: Callable, prompt_field: str) -> Dict:
     """
     Run experiments across different models and generation parameters using prompts from a dataset.
     Logs results to wandb and also saves them in a dictionary.
