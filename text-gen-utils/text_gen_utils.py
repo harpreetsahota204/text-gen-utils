@@ -94,7 +94,7 @@ def instantiate_huggingface_model(
     trust_remote_code: bool = False,
     pad_token: str = None,
     padding_side: str = "left"
-) -> Tuple[PreTrainedModel, PreTrainedTokenizer]:
+) -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
     """
     Instantiate a HuggingFace model with optional quantization using the BitsAndBytes library.
 
@@ -109,7 +109,7 @@ def instantiate_huggingface_model(
         padding_side (str, optional): The side on which to pad the sequences ('left' by default).
 
     Returns:
-        Tuple[PreTrainedModel, PreTrainedTokenizer]: The instantiated model and tokenizer.
+        The instantiated model and tokenizer.
     """
     # Default quantization configuration
     if quantization_config is None:
