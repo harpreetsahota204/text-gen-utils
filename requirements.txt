@@ -1,0 +1,7 @@
+transformers
+langchain
+accelerate
+wandb
+bitsandbytes
+datasets
+flash-attn --no-build-isolation
