@@ -1,8 +1,7 @@
 # text_gen_utils.py
 
 from typing import List, Dict, Callable, Tuple
-from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, AutoModelForCausalLM, AutoTokenizer
-from bitsandbytes import BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig, GenerationConfig
 import wandb
 import torch
 
