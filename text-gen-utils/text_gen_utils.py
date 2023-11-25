@@ -62,7 +62,13 @@ def run_single_param_experiment(model_name: str, pipeline: pipeline, prompt: str
         print(f"Prompt: {prompt}")
         print(f"Generated: {log_entry['generated_text']}\n")
 
-def run_experiments(models: Dict[str, pipeline], dataset: List[Dict], gen_params: Dict[str, List], gen_function: Callable, prompt_field: str) -> Dict:
+def run_experiments(models: Dict[str, pipeline], 
+                    dataset: List[Dict], 
+                    gen_params: Dict[str, List], 
+                    gen_function: Callable,
+                    prompt_field: str,
+                    your_wandb_project: str,
+                    your_wandb_entity: str) -> Dict:
     """
     Run experiments across different models and generation parameters using prompts from a dataset.
     Logs results to wandb and also saves them in a dictionary.
@@ -83,7 +89,7 @@ def run_experiments(models: Dict[str, pipeline], dataset: List[Dict], gen_params
         for data_entry in dataset:
             prompt = data_entry[prompt_field]
             for param, values in gen_params.items():
-                run_single_param_experiment(model_name, pipeline, prompt, param, values, gen_function, results_dict, "your_wandb_project", "your_wandb_entity")
+                run_single_param_experiment(model_name, pipeline, prompt, param, values, gen_function, results_dict, your_wandb_project, your_wandb_entity)
     return results_dict
 
 def instantiate_huggingface_model(
