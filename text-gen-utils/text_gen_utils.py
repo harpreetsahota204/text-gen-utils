@@ -4,7 +4,7 @@ from typing import List, Dict, Callable, Tuple
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, BitsAndBytesConfig, GenerationConfig
 import wandb
 import torch
-
+import pickle 
 def gen_pipeline(model_name: str, text: str, generation_pipeline: pipeline, **kwargs) -> Dict:
     """
     Generate text using a specific model pipeline and generation parameters.
@@ -88,12 +88,10 @@ def run_experiments(models, dataset, gen_params, gen_function, prompt_field):
     except KeyboardInterrupt:
         # Handle the interrupt
         print("Interrupted! Saving partial results.")
-        # Here you can add code to save the current state of results_dict
-        # For example, you might save it to a file:
         with open('partial_results.pkl', 'wb') as f:
             pickle.dump(results_dict, f)
 
-    # Optionally, save final results here if the loop completes
+    
     print("Experiment completed or interrupted. Results saved.")
     return results_dict
 
