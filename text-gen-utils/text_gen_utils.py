@@ -62,35 +62,41 @@ def run_single_param_experiment(model_name: str, pipeline: pipeline, prompt: str
         print(f"Prompt: {prompt}")
         print(f"Generated: {log_entry['generated_text']}\n")
 
-def run_experiments(models: Dict[str, pipeline], 
-                    dataset: List[Dict], 
-                    gen_params: Dict[str, List], 
-                    gen_function: Callable,
-                    prompt_field: str,
-                    your_wandb_project: str,
-                    your_wandb_entity: str) -> Dict:
+def run_experiments(models, dataset, gen_params, gen_function, prompt_field):
     """
-    Run experiments across different models and generation parameters using prompts from a dataset.
+    Run experiments across different models and generation parameters using prompts from a Hugging Face Dataset.
     Logs results to wandb and also saves them in a dictionary.
 
     Args:
-        models (Dict[str, Pipeline]): Dictionary of model names and their corresponding pipeline objects.
-        dataset (List[Dict]): List containing the prompts.
-        gen_params (Dict[str, List]): Dictionary of generation parameters and their corresponding values.
-        gen_function (Callable): The function to use for generating text.
-        prompt_field (str): The field in the dataset that contains the prompt text.
+        models (dict): Dictionary of model names and their corresponding pipeline objects.
+        dataset (Dataset): Hugging Face Dataset containing the prompts.
+        gen_params (dict): Dictionary of generation parameters and their corresponding values.
+        gen_function (function): The function to use for generating text.
 
     Returns:
-        Dict: Dictionary containing the results of all experiments.
+        dict: Dictionary containing the results of all experiments.
     """
     results_dict = {}
 
-    for model_name, pipeline in models.items():
-        for data_entry in dataset:
-            prompt = data_entry[prompt_field]
-            for param, values in gen_params.items():
-                run_single_param_experiment(model_name, pipeline, prompt, param, values, gen_function, results_dict, your_wandb_project, your_wandb_entity)
+    try:
+        for model_name, pipeline in models.items():
+            for data_entry in dataset:
+                prompt = data_entry[prompt_field]
+                for param, values in gen_params.items():
+                    run_single_param_experiment(model_name, pipeline, prompt, param, values, gen_function, results_dict)
+
+    except KeyboardInterrupt:
+        # Handle the interrupt
+        print("Interrupted! Saving partial results.")
+        # Here you can add code to save the current state of results_dict
+        # For example, you might save it to a file:
+        with open('partial_results.pkl', 'wb') as f:
+            pickle.dump(results_dict, f)
+
+    # Optionally, save final results here if the loop completes
+    print("Experiment completed or interrupted. Results saved.")
     return results_dict
+
 
 def instantiate_huggingface_model(
     model_name: str,
