@@ -54,26 +54,32 @@ def instantiate_huggingface_model(
 
     return model, tokenizer
 
-def gen_pipeline(model_name: str, text: str, generation_pipeline: pipeline, **kwargs) -> Dict:
+def gen_pipeline(model_name: str, text: str, generation_pipeline, **kwargs):
     """
     Generate text using a specific model pipeline and generation parameters.
+    Catches RuntimeError and continues generation with other parameters.
 
     Args:
         model_name (str): Name of the model being used.
         text (str): The prompt text to generate from.
-        generation_pipeline (Pipeline): Hugging Face pipeline object for text generation.
+        generation_pipeline: Hugging Face pipeline object for text generation.
         **kwargs: Variable keyword arguments for generation parameters.
 
     Returns:
         dict: A dictionary containing the model name, prompt, generated text, and generation parameters.
     """
-    generated_output = generation_pipeline(text, **kwargs)[0]['generated_text']
+    try:
+        generated_output = generation_pipeline(text, **kwargs)[0]['generated_text']
+    except RuntimeError as e:
+        print(f"RuntimeError caught during generation: {e}")
+        generated_output = "Error during generation"
     return {
         "model_name": model_name,
         "prompt": text,
         "generated_text": generated_output,
         "gen_config": kwargs
     }
+
 
 def run_single_param_experiment(model_name: str, pipeline: pipeline, prompt: str, param_name: str, values: List, gen_function: Callable, results_dict: Dict, wandb_project: str, wandb_entity: str):
     """
