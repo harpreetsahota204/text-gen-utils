@@ -167,28 +167,39 @@ def run_custom_param_experiment(model_name: str, pipeline, prompt: str, gen_para
         print(f"Generated: {log_entry['generated_text']}\n")
 
 
-def run_experiments(models, dataset, gen_params, gen_function, prompt_field):
+def run_experiments(models, dataset, gen_params, gen_function, prompt_field, wandb_project, wandb_entity):
     """
     Run experiments across different models and generation parameters using prompts from a Hugging Face Dataset.
+    Can handle both single-parameter and multi-parameter experiments.
     Logs results to wandb and also saves them in a list.
 
     Args:
         models (dict): Dictionary of model names and their corresponding pipeline objects.
         dataset (Dataset): Hugging Face Dataset containing the prompts.
-        gen_params (dict): Dictionary of generation parameters and their corresponding values.
+        gen_params (dict or list): Dictionary or list of dictionaries with generation parameters.
         gen_function (function): The function to use for generating text.
+        prompt_field (str): Field name in the dataset to extract the prompt.
+        wandb_project (str): Weights & Biases project name.
+        wandb_entity (str): Weights & Biases entity name.
 
     Returns:
         list: List containing the results of all experiments, formatted for DataFrame conversion.
     """
     results_list = []
 
+    # Convert single-parameter dict to list of dicts for uniformity
+    if isinstance(gen_params, dict):
+        # Convert each single parameter to a dict and append to a list
+        gen_params_list = [{param: value} for param, values in gen_params.items() for value in values]
+    else:
+        # Assume gen_params is already a list of dicts
+        gen_params_list = gen_params
+
     try:
         for model_name, pipeline in models.items():
             for data_entry in dataset:
                 prompt = data_entry[prompt_field]
-                for param, values in gen_params.items():
-                    run_single_param_experiment(model_name, pipeline, prompt, param, values, gen_function, results_list)
+                run_custom_param_experiment(model_name, pipeline, prompt, gen_params_list, gen_function, results_list, wandb_project, wandb_entity)
 
     except KeyboardInterrupt:
         # Handle the interrupt
@@ -198,3 +209,4 @@ def run_experiments(models, dataset, gen_params, gen_function, prompt_field):
 
     print("Experiment completed or interrupted. Results saved.")
     return results_list
+
