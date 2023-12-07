@@ -98,18 +98,13 @@ def run_single_param_experiment(model_name: str, pipeline: pipeline, prompt: str
     Returns:
         None
     """
+    run = wandb.init(project=wandb_project, entity=wandb_entity)
+    text_table = wandb.Table(columns=["model_name", "prompt", "parameter", "parameter_value", "generated_text"])
+
     for value in values:
-        run = wandb.init(project=wandb_project, entity=wandb_entity)
-        text_table = wandb.Table(columns=["model_name", "prompt", "parameter", "parameter_value", "generated_text"])
-        
         log_entry = gen_function(model_name, prompt, pipeline, **{param_name: value})
         text_table.add_data(model_name, prompt, param_name, value, log_entry['generated_text'])
-        
-        # Finish the WandB run
-        run.log({"generation": text_table})
-        wandb.finish()
 
-        # Append the results in the desired format to the list
         result_entry = {
             "model_name": model_name,
             "parameter": param_name,
@@ -118,11 +113,13 @@ def run_single_param_experiment(model_name: str, pipeline: pipeline, prompt: str
             "generated_text": log_entry['generated_text']
         }
         results_list.append(result_entry)
-
-        # Print the generated text
+        
         print(f"Model: {model_name}, Param: {param_name}, Value: {value}")
         print(f"Prompt: {prompt}")
         print(f"Generated: {log_entry['generated_text']}\n")
+
+    run.log({"generation": text_table})
+    wandb.finish()
 
 def run_custom_param_experiment(model_name: str, pipeline, prompt: str, gen_param_list: List[Dict], gen_function: Callable, results_list: List, wandb_project: str, wandb_entity: str):
     """
@@ -142,17 +139,13 @@ def run_custom_param_experiment(model_name: str, pipeline, prompt: str, gen_para
     Returns:
         None
     """
-    for param_dict in gen_param_list:
-        run = wandb.init(project=wandb_project, entity=wandb_entity)
-        text_table = wandb.Table(columns=["model_name", "prompt"] + list(param_dict.keys()) + ["generated_text"])
-        
-        log_entry = gen_function(model_name, prompt, pipeline, **param_dict)
-        text_table.add_data(model_name, prompt, *param_dict.values(), log_entry['generated_text'])
-        
-        run.log({"generation": text_table})
-        wandb.finish()
+    run = wandb.init(project=wandb_project, entity=wandb_entity)
+    text_table = wandb.Table(columns=["model_name", "prompt"] + ["parameter"] + ["generated_text"])
 
-        # Save the formatted result in the list
+    for param_dict in gen_param_list:
+        log_entry = gen_function(model_name, prompt, pipeline, **param_dict)
+        text_table.add_data(model_name, prompt, str(param_dict), log_entry['generated_text'])
+
         formatted_result = {
             "model_name": model_name,
             "gen_config": param_dict,
@@ -161,10 +154,12 @@ def run_custom_param_experiment(model_name: str, pipeline, prompt: str, gen_para
         }
         results_list.append(formatted_result)
 
-        # Print the generated text
         print(f"Model: {model_name}, Params: {param_dict}")
         print(f"Prompt: {prompt}")
         print(f"Generated: {log_entry['generated_text']}\n")
+
+    run.log({"generation": text_table})
+    wandb.finish()
 
 
 def run_experiments(models, dataset, gen_params, gen_function, prompt_field, wandb_project, wandb_entity):
